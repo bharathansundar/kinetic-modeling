@@ -1,5 +1,4 @@
 #conducted at 523K (250 C)
-
 import numpy as np
 from scipy.integrate import odeint
 %matplotlib inline
@@ -18,7 +17,7 @@ def kvalue (parameters, temp):
     
 kvals = kvalue([ [2.44e-82, 27.34, 268.01], [1.84e1, 1.53, 85.14], [4.04e-2, 3.04, 358.71], [4.66e3, 2.07, 393.87], [1.10e-27, 11.07, 235.33] ], 523)
 
-print(kvals)
+#print(kvals)
 
 def HTL (x, t): 
     
@@ -38,7 +37,7 @@ def HTL (x, t):
     d4dt = (kr3)*x[0]*x[2]+(kr4)*x[0]*x[1]
     d5dt = (kr5)*x[0]
     d6dt = (kr1)*x[0] - (kr2)*x[5]*x[6]
-    d7dt = (kr1)*x[0] - (kr2)*x[5]*x[6]
+    d7dt = -(kr2)*x[5]*x[6]
     d8dt = (kr3)*x[0]*x[2]
     d9dt = (kr4)*x[0]*x[1]
     d10dt = (kr5)*x[0]
@@ -48,13 +47,13 @@ def HTL (x, t):
     return [d1dt, d2dt, d3dt, d4dt, d5dt, d6dt, d7dt, d8dt, d9dt, d10dt, d11dt]
 
 
-# linspace from t=0 to 7200s (120 minutes), 120 intervals
+# linspace from t=0 to 1e-8 seconds, 72000 intervals
 t = np.linspace(0, 0.00000001, 72000)
 
 # initial concentrations of glycine, hydrogen, water, ammonia, carbon dioxide, imine, diene, hydroxyacetic acid, acetic acid, methanamine, tetrahydropyridine (N-heterocycle) respectively 
 #Algae has between: 6-20% protein, 33-64% carbohydrate, and 11-21% lipid.
 
-x0 = [15, 5, 80, 0, 0, 0, 0, 0, 0, 0, 0]
+x0 = [15, 5, 70, 0, 0, 0, 10, 0, 0, 0, 0]
 concentration = odeint(HTL, x0, t)
 
 x1 = concentration[: , 0]
@@ -68,8 +67,6 @@ x8 = concentration[: , 7]
 x9 = concentration[: , 8]
 x10 = concentration[: , 9]
 x11 = concentration[: , 10]
-
-
 
 plt.plot(t, x1, label="glycine")
 plt.plot(t, x2, label="hydrogen")
@@ -90,6 +87,6 @@ plt.xlabel('time (min)')
 plt.xscale('linear', linthreshx=60)
 
 plt.ylabel('mole % (out of 100)')
-plt.yscale('symlog', linthreshy=100)
+plt.yscale('linear', linthreshy=100)
 
 plt.title('Mole Fraction. vs. Time for HTL of Microalgae Components')
