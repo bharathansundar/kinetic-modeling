@@ -1,0 +1,135 @@
+#conducted at 523K (250 C)
+import numpy as np
+from scipy.integrate import odeint
+%matplotlib inline
+import  matplotlib.pyplot as plt
+
+
+import numpy as np
+
+def kvalue (parameters, temp):
+    #parameters = A, n, Ea
+    klist = []
+    for kval in parameters: 
+        k = kval[0]*(temp**kval[1])*np.exp(-kval[2] / 8.314 / temp)
+        klist.append(k)
+    return klist
+  
+#values from CBS-QB3 computational methods 
+kvals1 = kvalue([ [2.44e-82, 27.34, 268.01], [1.84e1, 1.53, 85.14], [4.04e-2, 3.04, 358.71], [4.66e3, 2.07, 393.87], [1.10e-27, 11.07, 235.33] ], 523)
+kvals2 = kvalue([ [4.66e-5, 4.29, 88.83], [1.01e-9, 5.71, 203.37], [3.04e-1, 2.69, 94.53], [4.62e-36, 13.58, 206.41], [62.3, 3.12, 182.47], [5.87e-1, 2.86, 138.68] ], 523)
+
+#print(kvals)
+
+def HTL (x, t): 
+    
+    #k values for reactions 1-5 in scheme 1
+    kr11 = kvals1[0]
+    kr12 = kvals1[1]
+    kr13 = kvals1[2]
+    kr14 = kvals1[3]
+    kr15 = kvals1[4]
+    
+    #k values for reactions 1-6 in scheme 2
+    kr21 = kvals2[0]
+    kr22 = kvals2[1]
+    kr23 = kvals2[2]
+    kr24 = kvals2[3]
+    kr25 = kvals2[4]
+    kr26 = kvals2[5]
+    
+    
+    
+    #1-10 for glycine, hydrogen, water, ammonia, carbon dioxide, imine, diene, hydroxyacetic acid, acetic acid, methanamine, tetrahydropyridine (N-heterocycle) respectively 
+ 
+    d1dt = -(kr11)*x[0]-(kr13)*x[0]*x[2]-(kr14)*x[0]*x[1]-(kr15)*x[0]-(kr21)*x[0]*x[1]
+    
+    d2dt = (kr11)*x[0]-(kr14)*x[0]*x[1]-(kr21)*x[0]*x[1]
+    
+    d3dt = -(kr13)*x[0]*x[2]+(kr22)*x[12]-(kr25)*x[2]*x[15]
+    
+    d4dt = (kr13)*x[0]*x[2]+(kr14)*x[0]*x[1]
+    
+    d5dt = (kr15)*x[0]+(kr24)*x[6]*x[13]
+    
+    d6dt = (kr11)*x[0] - (kr12)*x[5]*x[6]
+    
+    d7dt = -(kr12)*x[5]*x[6]-(kr23)*x[13]*x[6]-(kr24)*x[13]*x[6]
+    
+    d8dt = (kr13)*x[0]*x[2]
+    
+    d9dt = (kr14)*x[0]*x[1]+(kr26)*x[16]
+    
+    d10dt = (kr15)*x[0]
+    
+    d11dt = (kr12)*x[5]*x[6]
+    
+    d12dt = (kr26)*x[16]
+    
+    d13dt = (kr21)*x[0]*x[1] - (kr22)*x[12]
+    
+    d14dt = (kr22)*x[12]-(kr23)*x[13]*x[6]-(kr24)*x[13]*x[6]
+    
+    d15dt = (kr23)*x[13]*x[6]
+    
+    d16dt = (kr24)*x[13]*x[6]-(kr25)*x[15]*x[2]
+    
+    d17dt = (kr25)*x[15]*x[2] - (kr26)*x[16]
+    
+    #print([dxpdt, dxcdt, dxldt, dxAPdt, dxBCdt, dxGasdt])
+    return [d1dt, d2dt, d3dt, d4dt, d5dt, d6dt, d7dt, d8dt, d9dt, d10dt, d11dt]
+
+
+
+    
+    
+# linspace from t=0 to 1e-8 seconds, 72000 intervals
+t = np.linspace(0, 0.00000001, 72000)
+
+
+# initial concentrations of glycine, hydrogen, water, ammonia, carbon dioxide, imine, diene, hydroxyacetic acid, acetic acid, methanamine, tetrahydropyridine, formaldehyde, hydroxymethylglycine, methyleneamino acetic acid, dihydropyridin acetic acid, methylmethanimine, methylamino methanol 
+#Algae has between: 6-20% protein, 33-64% carbohydrate, and 11-21% lipid.
+
+x0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+concentration = odeint(HTL, x0, t)
+
+x1 = concentration[: , 0]
+x2 = concentration[: , 1]
+x3 = concentration[: , 2]
+x4 = concentration[: , 3]
+x5 = concentration[: , 4]
+x6 = concentration[: , 5]
+x7 = concentration[: , 6]
+x8 = concentration[: , 7] 
+x9 = concentration[: , 8]
+x10 = concentration[: , 9]
+x11 = concentration[: , 10]
+x12 = concentration[: , 11]
+x13 = concentration[: , 12]
+x14 = concentration[: , 13]
+x15 = concentration[: , 14]
+x16 = concentration[: , 15]
+x17 = concentration[: , 16]
+
+plt.plot(t, x1, label="glycine")
+plt.plot(t, x2, label="hydrogen")
+plt.plot(t, x3, label="water")
+plt.plot(t, x4, label="ammonia")
+plt.plot(t, x5, label="carbon dioxide")
+plt.plot(t, x6, label="imine")
+plt.plot(t, x7, label="diene")
+plt.plot(t, x8, label="hydroxyacetic acid")
+plt.plot(t, x9, label="acetic acid")
+plt.plot(t, x10, label="methanamine")
+plt.plot(t, x11, label="tetrahydropyridine")
+
+
+plt.legend(bbox_to_anchor=(1.05,1), loc='upper left', borderaxespad=0.)
+
+plt.xlabel('time (min)')
+plt.xscale('linear', linthreshx=60)
+
+plt.ylabel('mole % (out of 100)')
+plt.yscale('linear', linthreshy=100)
+
+plt.title('Mole Fraction. vs. Time for HTL of Microalgae Components')
