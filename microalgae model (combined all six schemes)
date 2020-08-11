@@ -122,6 +122,13 @@ plt.plot(t, x8, label="hydroxyacetic acid")
 plt.plot(t, x9, label="acetic acid")
 plt.plot(t, x10, label="methanamine")
 plt.plot(t, x11, label="tetrahydropyridine")
+plt.plot(t, x12, label="formaldehyde")
+plt.plot(t, x13, label="hydroxymethylglycine")
+plt.plot(t, x14, label="methyleneamino acetic acid")
+plt.plot(t, x15, label="dihydropyridin acetic acid")
+plt.plot(t, x16, label="methylmethanimine")
+plt.plot(t, x17, label="methylamino methanol")
+
 
 
 plt.legend(bbox_to_anchor=(1.05,1), loc='upper left', borderaxespad=0.)
