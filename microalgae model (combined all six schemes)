@@ -16,8 +16,10 @@ def kvalue (parameters, temp):
     return klist
   
 #values from CBS-QB3 computational methods 
+#k in units of s^-1 (1st order) and M^-1*s^-1 (2nd order)
 kvals1 = kvalue([ [2.44e-82, 27.34, 268.01], [1.84e1, 1.53, 85.14], [4.04e-2, 3.04, 358.71], [4.66e3, 2.07, 393.87], [1.10e-27, 11.07, 235.33] ], 523)
 kvals2 = kvalue([ [4.66e-5, 4.29, 88.83], [1.01e-9, 5.71, 203.37], [3.04e-1, 2.69, 94.53], [4.62e-36, 13.58, 206.41], [62.3, 3.12, 182.47], [5.87e-1, 2.86, 138.68] ], 523)
+kvals3 = kvalue([ [1.29e-6, 4.65, 93.62], [3.31e15,-1.57,225.87], [5.66e-1, 2.32, 100.17], [1.27e-34, 13.03, 208.74], [2.96e-10, 5.86, 285.792], [3.76e-1, 3.48, 176.94], [4.63e9, -0.055, 154.02] ], 523)
 
 #print(kvals)
 
@@ -38,23 +40,30 @@ def HTL (x, t):
     kr25 = kvals2[4]
     kr26 = kvals2[5]
     
+    #k values for reactions 1-7 in scheme 3
+    kr31 = kvals3[0]
+    kr32 = kvals3[1]
+    kr33 = kvals3[2]
+    kr34 = kvals3[3]
+    kr35 = kvals3[4]
+    kr36 = kvals3[5]
+    kr37 = kvals3[6]
     
-    
-    #1-10 for glycine, hydrogen, water, ammonia, carbon dioxide, imine, diene, hydroxyacetic acid, acetic acid, methanamine, tetrahydropyridine (N-heterocycle) respectively 
+    #dx/dt values for all of the different molecules across all schemes and pathways
  
-    d1dt = -(kr11)*x[0]-(kr13)*x[0]*x[2]-(kr14)*x[0]*x[1]-(kr15)*x[0]-(kr21)*x[0]*x[1]
+    d1dt = -(kr11)*x[0]-(kr13)*x[0]*x[2]-(kr14)*x[0]*x[1]-(kr15)*x[0]-(kr21)*x[0]*x[1]-(kr31)*x[0]*x[17]
     
     d2dt = (kr11)*x[0]-(kr14)*x[0]*x[1]-(kr21)*x[0]*x[1]
     
-    d3dt = -(kr13)*x[0]*x[2]+(kr22)*x[12]-(kr25)*x[2]*x[15]
+    d3dt = -(kr13)*x[0]*x[2]+(kr22)*x[12]-(kr25)*x[2]*x[15]+(kr32)*x[18]-(kr36)*x[22]*x[2]
     
     d4dt = (kr13)*x[0]*x[2]+(kr14)*x[0]*x[1]
     
-    d5dt = (kr15)*x[0]+(kr24)*x[6]*x[13]
+    d5dt = (kr15)*x[0]+(kr24)*x[6]*x[13]+(kr34)*x[19]*x[6]
     
     d6dt = (kr11)*x[0] - (kr12)*x[5]*x[6]
     
-    d7dt = -(kr12)*x[5]*x[6]-(kr23)*x[13]*x[6]-(kr24)*x[13]*x[6]
+    d7dt = -(kr12)*x[5]*x[6]-(kr23)*x[13]*x[6]-(kr24)*x[13]*x[6]-(kr33)*x[19]*x[6]-(kr34)*x[19]*x[6]
     
     d8dt = (kr13)*x[0]*x[2]
     
@@ -64,7 +73,7 @@ def HTL (x, t):
     
     d11dt = (kr12)*x[5]*x[6]
     
-    d12dt = (kr26)*x[16]
+    d12dt = (kr26)*x[16]+(kr37)*x[23]
     
     d13dt = (kr21)*x[0]*x[1] - (kr22)*x[12]
     
@@ -76,8 +85,24 @@ def HTL (x, t):
     
     d17dt = (kr25)*x[15]*x[2] - (kr26)*x[16]
     
+    d18dt = -(kr31)*x[0]*x[17]
+    
+    d19dt = (kr31)*x[0]*x[17] - (kr32)*x[18]
+    
+    d20dt = (kr32)*x[18] - (kr33)*x[19]*x[6] -(kr33)*x[19]*x[6]
+    
+    d21dt = (kr33)*x[19]*x[6]
+    
+    d22dt = (kr34)*x[19]*x[6] - (kr35)*x[21]
+    
+    d23dt = (kr35)*x[21] - (kr36)*x[22]*x[2]
+    
+    d24dt = (kr36)*x[22]*x[2] - (kr37)*x[23]
+    
+    d25dt = (kr37)*x[23]
+    
     #print([dxpdt, dxcdt, dxldt, dxAPdt, dxBCdt, dxGasdt])
-    return [d1dt, d2dt, d3dt, d4dt, d5dt, d6dt, d7dt, d8dt, d9dt, d10dt, d11dt]
+    return [d1dt, d2dt, d3dt, d4dt, d5dt, d6dt, d7dt, d8dt, d9dt, d10dt, d11dt, d12dt, d13dt, d14dt, d15dt, d16dt, d17dt, d18dt, d19dt, d20dt, d21dt, d22dt, d23dt, d24dt, d25dt]
 
 
 
@@ -87,10 +112,9 @@ def HTL (x, t):
 t = np.linspace(0, 0.00000001, 72000)
 
 
-# initial concentrations of glycine, hydrogen, water, ammonia, carbon dioxide, imine, diene, hydroxyacetic acid, acetic acid, methanamine, tetrahydropyridine, formaldehyde, hydroxymethylglycine, methyleneamino acetic acid, dihydropyridin acetic acid, methylmethanimine, methylamino methanol 
 #Algae has between: 6-20% protein, 33-64% carbohydrate, and 11-21% lipid.
 
-x0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+x0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 concentration = odeint(HTL, x0, t)
 
 x1 = concentration[: , 0]
@@ -110,6 +134,15 @@ x14 = concentration[: , 13]
 x15 = concentration[: , 14]
 x16 = concentration[: , 15]
 x17 = concentration[: , 16]
+x18 = concentration[: , 17]
+x19 = concentration[: , 18]
+x20 = concentration[: , 19]
+x21 = concentration[: , 20]
+x22 = concentration[: , 21]
+x23 = concentration[: , 22]
+x24 = concentration[: , 23]
+x25 = concentration[: , 24]
+
 
 plt.plot(t, x1, label="glycine")
 plt.plot(t, x2, label="hydrogen")
@@ -127,7 +160,16 @@ plt.plot(t, x13, label="hydroxymethylglycine")
 plt.plot(t, x14, label="methyleneamino acetic acid")
 plt.plot(t, x15, label="dihydropyridin acetic acid")
 plt.plot(t, x16, label="methylmethanimine")
-plt.plot(t, x17, label="methylamino methanol")
+plt.plot(t, x17, label="furfural")
+plt.plot(t, x18, label="(furan-2-yl(hydroxy)methyl)glycine)")
+plt.plot(t, x19, label="(Z)-2-((furan-2-ylmethylene)amino)acetic acid")
+plt.plot(t, x20, label="2-(2-(furan-2-yl)-3,6-dihydropyridin-1(2H)-yl)acetic acid")
+plt.plot(t, x21, label="(Z)-1-(furan-2-yl)-Nmethylmethanimine")
+plt.plot(t, x22, label="N-(furan-2-ylmethyl)methanimine")
+plt.plot(t, x23, label="((furan-2-ylmethyl)amino)methanol")
+plt.plot(t, x24, label="furan-2-ylmethanamine")
+plt.plot(t, x25, label="(S)-2,3-dihydroxypropanal;glyceraldehyde")
+
 
 
 
